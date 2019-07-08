@@ -1,5 +1,5 @@
 <objdefs appVersion="1.0.12">
-   <obj.normal id="ewithresh" uuid="4f134487-1cd4-41a1-a4b8-52cd40fb3e71">
+   <obj.normal id="ewi_thresh" uuid="f06f558e-d6bf-4331-9c1d-c395502ba1c1">
       <sDescription>Breath threshold for EWI
 - No signal under threshold
 - Above threshold, signal scaled from 0-max</sDescription>

@@ -11,7 +11,7 @@
          <spinner attributeName="bendsens" value="25"/>
       </attribs>
    </obj>
-   <patcher type="patch/patcher" uuid="4aba8bb9-7bf9-4be1-adab-74df972ab807" name="OSC ctrl" x="210" y="42">
+   <patcher type="patch/patcher" uuid="375aa3e3-6356-403a-a543-6e5af89c6d36" name="OSC ctrl" x="210" y="42">
       <params>
          <frac32.u.map name="Breath Thresh" value="0.0"/>
          <frac32.s.map name="Breath Curve:exp" value="0.0"/>

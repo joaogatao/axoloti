@@ -1,5 +1,5 @@
 <objdefs appVersion="1.0.12">
-   <obj.normal id="ewi" uuid="37b06d9b-fd8e-44ce-939f-3781533371a1">
+   <obj.normal id="ewi_in" uuid="3e718ff6-1664-49bd-9646-49bcc01c6e5a">
       <sDescription>Monophonic MIDI breath controller (EWI4000s) input: note, gate, velocity, breath, bend, glide</sDescription>
       <author>Joao Gatao</author>
       <license>GPL</license>
@@ -10,7 +10,7 @@
          <bool32 name="gate" description="key pressed no retrigger legato"/>
          <frac32.positive name="velocity" description="note-on velocity (breath attack)"/>
          <bool32 name="hold" description="hold toggle"/>
-         <bool32 name="sustain" description="sustain toggle"/>
+         <bool32 name="octave" description="octave toggle"/>
       </outlets>
       <displays/>
       <params>
@@ -29,7 +29,7 @@ int32_t _gate;
 uint8_t _velo;
 int32_t _breath;
 int32_t _hold;
-int32_t _sustain;
+int32_t _octave;
 int32_t _gliss;
 int32_t _bend;
 
@@ -44,14 +44,14 @@ int32_t bend;]]></code.declaration>
 _note = 0;
 _breath = 0;
 _hold = 0;
-_sustain = 0;
+_octave = 0;
 _gliss = 0;
 _bend = 0;]]></code.init>
       <code.krate><![CDATA[outlet_gate= _gate;
 outlet_velocity= _velo<<20;
 outlet_breath= _breath<<20;
 outlet_hold= _hold;
-outlet_sustain= _sustain;
+outlet_octave= _octave;
 
 pitch= _note<<21;
 
@@ -111,9 +111,9 @@ if ((status == attr_midichannel + MIDI_CONTROL_CHANGE)&&(data1 == 64)&&(data2)) 
 }
 
 if ((status == attr_midichannel + MIDI_CONTROL_CHANGE)&&(data1 == 69)&&(data2)) {
-  _sustain = 1<<27;
+  _octave = 1<<27;
 } else if ((status == attr_midichannel + MIDI_CONTROL_CHANGE)&&(data1 == 69)&&(!data2)) {
-  _sustain = 0;
+  _octave = 0;
 }
 
 if ((status == attr_midichannel + MIDI_CONTROL_CHANGE)&&(data1 == 5)) {
