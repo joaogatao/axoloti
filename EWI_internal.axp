@@ -2,202 +2,16 @@
    <comment type="patch/comment" x="28" y="14" text="see Vyzex EWI4000s manual "/>
    <comment type="patch/comment" x="476" y="28" text="osc gain"/>
    <comment type="patch/comment" x="588" y="28" text="OSC1 level"/>
-   <patcher type="patch/patcher" uuid="838d8b49-d3d5-476c-b2d8-c5ba77c10a16" name="EWI_in" x="28" y="42">
+   <obj type="ewi_in" uuid="3e718ff6-1664-49bd-9646-49bcc01c6e5a" name="ewi_in_1" x="42" y="42">
       <params>
-         <frac32.u.map name="bend (10=semi)" value="10.0"/>
-         <frac32.u.map name="time:glide" value="0.0"/>
+         <frac32.s.map name="glide" value="21.0"/>
+         <frac32.u.map name="bend" value="2.0"/>
       </params>
-      <attribs/>
-      <subpatch appVersion="1.0.12">
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="BREATH" x="56" y="14">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="2"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <obj type="math/*" uuid="922423f2db9f222aa3e5ba095778288c446da47a" name="*_1" x="700" y="14">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="patch/outlet f" uuid="d18a9a550bcaaebac94e25983bd0e27dbfd7233c" name="Breath" x="812" y="14">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="midi/in/bend" uuid="7bd8cace52a8c26ed61d80f65e238408d5d621f4" name="BEND (ch 1)" x="56" y="112">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="jv/math/constrain b" uuid="32556959-2471-4853-a1ee-cd607b20fccc" name="constrain_1" x="154" y="112">
-            <params>
-               <frac32.s.map name="minimum" value="-25.0"/>
-               <frac32.s.map name="maximum" value="25.0"/>
-            </params>
-            <attribs/>
-         </obj>
-         <obj type="math/*c" uuid="7d5ef61c3bcd571ee6bbd8437ef3612125dfb225" name="*c_1" x="392" y="112">
-            <params>
-               <frac32.u.map name="amp" value="16.3799991607666"/>
-            </params>
-            <attribs/>
-         </obj>
-         <obj type="mix/mix 1" uuid="26fb1fe4ed25d8bc2ac4a3f91ab6b80ed6d9d4fa" name="bend (10=semi)" x="700" y="112">
-            <params>
-               <frac32.u.map name="gain1" onParent="true" value="10.0"/>
-            </params>
-            <attribs/>
-         </obj>
-         <obj type="patch/outlet f" uuid="d18a9a550bcaaebac94e25983bd0e27dbfd7233c" name="Note" x="812" y="112">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="midi/in/keyb" uuid="53b04874696932f38aceaa168bd5d9efb743716d" name="NOTE" x="42" y="168">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="sss/math/glideMultiExt" uuid="b0be6350-d9b7-4407-b6b5-70011ed760de" name="time" x="532" y="224">
-            <params>
-               <frac32.u.map name="glide" onParent="true" value="0.0"/>
-               <int32.hradio name="mode" value="2"/>
-            </params>
-            <attribs/>
-         </obj>
-         <obj type="patch/outlet f" uuid="d18a9a550bcaaebac94e25983bd0e27dbfd7233c" name="Velocity" x="812" y="224">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="GLIDE PLATE" x="56" y="266">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="5"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <obj type="patch/outlet b" uuid="191792f616d4835dba0b55375474a12942e5bcbd" name="Gate" x="378" y="322">
-            <params/>
-            <attribs/>
-         </obj>
-         <comment type="patch/comment" x="56" y="378" text="o Sustain: toggle only when gate (breath) is active"/>
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="HOLD" x="56" y="392">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="64"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <obj type="conv/to b" uuid="91ff898f0f2bf6e4dc0165515e0be7c2281da18b" name="to_1" x="210" y="392">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="patch/outlet b" uuid="191792f616d4835dba0b55375474a12942e5bcbd" name="Hold" x="378" y="392">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="OCTAVE" x="56" y="490">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="69"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <obj type="conv/to b" uuid="91ff898f0f2bf6e4dc0165515e0be7c2281da18b" name="to_2" x="210" y="490">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="patch/outlet b" uuid="191792f616d4835dba0b55375474a12942e5bcbd" name="Octave" x="378" y="490">
-            <params/>
-            <attribs/>
-         </obj>
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="PITCH BEND UP" x="56" y="602">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="48"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <obj type="midi/in/cc" uuid="6096d217701cbdf251a9ab6ba029af78c5722a56" name="PITCH BEND DOWN" x="56" y="700">
-            <params/>
-            <attribs>
-               <spinner attributeName="cc" value="49"/>
-               <spinner attributeName="default" value="0"/>
-            </attribs>
-         </obj>
-         <nets>
-            <net>
-               <source obj="GLIDE PLATE" outlet="midiCC"/>
-               <dest obj="time" inlet="Glide"/>
-            </net>
-            <net>
-               <source obj="NOTE" outlet="note"/>
-               <dest obj="time" inlet="in"/>
-            </net>
-            <net>
-               <source obj="time" outlet="out"/>
-               <dest obj="bend (10=semi)" inlet="bus_in"/>
-            </net>
-            <net>
-               <source obj="bend (10=semi)" outlet="out"/>
-               <dest obj="Note" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="NOTE" outlet="velocity"/>
-               <dest obj="Velocity" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="BREATH" outlet="midiCC"/>
-               <dest obj="*_1" inlet="a"/>
-            </net>
-            <net>
-               <source obj="NOTE" outlet="gate"/>
-               <dest obj="*_1" inlet="b"/>
-               <dest obj="Gate" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="*_1" outlet="result"/>
-               <dest obj="Breath" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="HOLD" outlet="midiCC"/>
-               <dest obj="to_1" inlet="i"/>
-            </net>
-            <net>
-               <source obj="OCTAVE" outlet="midiCC"/>
-               <dest obj="to_2" inlet="i"/>
-            </net>
-            <net>
-               <source obj="to_1" outlet="o"/>
-               <dest obj="Hold" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="to_2" outlet="o"/>
-               <dest obj="Octave" inlet="outlet"/>
-            </net>
-            <net>
-               <source obj="BEND (ch 1)" outlet="bend"/>
-               <dest obj="constrain_1" inlet="in"/>
-            </net>
-            <net>
-               <source obj="constrain_1" outlet="out"/>
-               <dest obj="*c_1" inlet="in"/>
-            </net>
-            <net>
-               <source obj="*c_1" outlet="out"/>
-               <dest obj="bend (10=semi)" inlet="in1"/>
-            </net>
-         </nets>
-         <settings>
-            <subpatchmode>no</subpatchmode>
-         </settings>
-         <notes><![CDATA[]]></notes>
-         <windowPos>
-            <x>0</x>
-            <y>108</y>
-            <width>1910</width>
-            <height>789</height>
-         </windowPos>
-      </subpatch>
-   </patcher>
-   <patcher type="patch/patcher" uuid="9e08d16b-d807-4a97-aabb-9f580d1aa03f" name="OSC ctrl" x="210" y="42">
+      <attribs>
+         <spinner attributeName="bendsens" value="25"/>
+      </attribs>
+   </obj>
+   <patcher type="patch/patcher" uuid="4aba8bb9-7bf9-4be1-adab-74df972ab807" name="OSC ctrl" x="210" y="42">
       <params>
          <frac32.u.map name="Breath Thresh" value="0.0"/>
          <frac32.s.map name="Breath Curve:exp" value="0.0"/>
@@ -216,7 +30,7 @@
             <params/>
             <attribs/>
          </obj>
-         <obj type="ewithresh" uuid="4f134487-1cd4-41a1-a4b8-52cd40fb3e71" name="Breath Thresh" x="350" y="70">
+         <obj type="ewi_thresh" uuid="f06f558e-d6bf-4331-9c1d-c395502ba1c1" name="Breath Thresh" x="350" y="70">
             <params>
                <frac32.u.map name="th" onParent="true" value="0.0"/>
             </params>
@@ -395,9 +209,9 @@
          <notes><![CDATA[]]></notes>
          <windowPos>
             <x>0</x>
-            <y>25</y>
+            <y>27</y>
             <width>1920</width>
-            <height>1055</height>
+            <height>1053</height>
          </windowPos>
       </subpatch>
    </patcher>
@@ -407,7 +221,7 @@
       </params>
       <attribs/>
    </obj>
-   <obj type="mix/mix 3" uuid="8be16f2156012a4a8974804178cece51555f272b" name="OSC" x="588" y="42">
+   <obj type="mix/mix 3" uuid="8be16f2156012a4a8974804178cece51555f272b" name="mix_1" x="588" y="42">
       <params>
          <frac32.u.map name="gain1" value="42.0"/>
          <frac32.u.map name="gain2" value="0.0"/>
@@ -441,7 +255,7 @@
       <params/>
       <attribs/>
    </obj>
-   <obj type="math/muls 64" uuid="ffac4e7340f665f5e4c92f2d2748cee1a397783a" name="muls_3" x="910" y="182">
+   <obj type="math/muls 64" uuid="ffac4e7340f665f5e4c92f2d2748cee1a397783a" name="muls_2" x="910" y="182">
       <params/>
       <attribs/>
    </obj>
@@ -464,11 +278,11 @@
       <attribs/>
    </obj>
    <comment type="patch/comment" x="336" y="280" text="no influence = 64"/>
-   <obj type="math/-" uuid="1643d55e6e7ce1c995a5e66db9f54fd969e6c9b7" name="-_1" x="896" y="336">
+   <obj type="math/-" uuid="3280bb759e9fc189e134300e48dda7e903c9a110" name="-_1" x="896" y="336">
       <params/>
       <attribs/>
    </obj>
-   <obj type="math/*" uuid="b3eac405185d2a86512723be5db59930f78c4b4c" name="*_1" x="966" y="336">
+   <obj type="math/*" uuid="922423f2db9f222aa3e5ba095778288c446da47a" name="*_1" x="966" y="336">
       <params/>
       <attribs/>
    </obj>
@@ -505,17 +319,9 @@
    </obj>
    <nets>
       <net>
-         <source obj="EWI_in" outlet="Breath"/>
+         <source obj="ewi_in_1" outlet="breath"/>
          <dest obj="*_3" inlet="a"/>
          <dest obj="OSC ctrl" inlet="Breath"/>
-      </net>
-      <net>
-         <source obj="EWI_in" outlet="Gate"/>
-         <dest obj="OSC ctrl" inlet="Gate"/>
-      </net>
-      <net>
-         <source obj="EWI_in" outlet="Velocity"/>
-         <dest obj="OSC ctrl" inlet="Velocity"/>
       </net>
       <net>
          <source obj="i_1" outlet="out"/>
@@ -527,8 +333,8 @@
       </net>
       <net>
          <source obj="i_2" outlet="out"/>
-         <dest obj="+_1" inlet="in2"/>
          <dest obj="-_1" inlet="in2"/>
+         <dest obj="+_1" inlet="in2"/>
       </net>
       <net>
          <source obj="-_1" outlet="out"/>
@@ -561,10 +367,10 @@
       </net>
       <net>
          <source obj="*_3" outlet="result"/>
-         <dest obj="muls_3" inlet="in"/>
+         <dest obj="muls_2" inlet="in"/>
       </net>
       <net>
-         <source obj="muls_3" outlet="out"/>
+         <source obj="muls_2" outlet="out"/>
          <dest obj="*_2" inlet="a"/>
       </net>
       <net>
@@ -579,22 +385,22 @@
       </net>
       <net>
          <source obj="saw_1" outlet="wave"/>
-         <dest obj="OSC" inlet="in1"/>
+         <dest obj="mix_1" inlet="in1"/>
       </net>
       <net>
          <source obj="tri_1" outlet="wave"/>
-         <dest obj="OSC" inlet="in2"/>
+         <dest obj="mix_1" inlet="in2"/>
       </net>
       <net>
          <source obj="pwm_1" outlet="wave"/>
-         <dest obj="OSC" inlet="in3"/>
+         <dest obj="mix_1" inlet="in3"/>
       </net>
       <net>
          <source obj="vca_1" outlet="o"/>
          <dest obj="lp_1" inlet="in"/>
       </net>
       <net>
-         <source obj="OSC" outlet="out"/>
+         <source obj="mix_1" outlet="out"/>
          <dest obj="vca_1" inlet="a"/>
       </net>
       <net>
@@ -606,9 +412,17 @@
          <dest obj="pwm_1" inlet="pw"/>
       </net>
       <net>
-         <source obj="EWI_in" outlet="Note"/>
-         <dest obj="OSC ctrl" inlet="Note"/>
+         <source obj="ewi_in_1" outlet="note"/>
          <dest obj="-_1" inlet="in1"/>
+         <dest obj="OSC ctrl" inlet="Note"/>
+      </net>
+      <net>
+         <source obj="ewi_in_1" outlet="gate"/>
+         <dest obj="OSC ctrl" inlet="Gate"/>
+      </net>
+      <net>
+         <source obj="ewi_in_1" outlet="velocity"/>
+         <dest obj="OSC ctrl" inlet="Velocity"/>
       </net>
    </nets>
    <settings>
