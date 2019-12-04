@@ -5,7 +5,7 @@ MidiBus myBus; // The MidiBus
 boolean midiThru = true;  // no need for sending midi in this sketch
 
 float midiX0;
-float midiX1;
+float midiY0;
 
 
 void setup() {
