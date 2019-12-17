@@ -1,0 +1,1027 @@
+<patch-1.0 appVersion="1.0.12">
+   <patchobj type="patch/object" uuid="3e7b6bc9-7630-44ab-a3a3-857c65be5a9d" name="BPMext_1" x="0" y="14">
+      <params>
+         <int32 name="BPM" value="104"/>
+         <int32 name="vari1" value="48"/>
+         <int32 name="vari2" value="384"/>
+         <int32 name="vari3" value="3"/>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="3e7b6bc9-7630-44ab-a3a3-857c65be5a9d">
+         <sDescription>simple master clock source in BPM.
+outputs pulses for beat, triplets, fourths and a variable rate multiplier.</sDescription>
+         <author>Remco van der Most</author>
+         <license>BSD</license>
+         <helpPatch>lfo.axh</helpPatch>
+         <inlets>
+            <int32 name="BPM"/>
+            <bool32.rising name="reset" description="reset phase"/>
+            <int32 name="vari3"/>
+         </inlets>
+         <outlets>
+            <bool32 name="beat" description="square wave"/>
+            <bool32 name="trips"/>
+            <bool32 name="fours"/>
+            <bool32 name="32"/>
+            <bool32 name="64"/>
+            <bool32 name="vari1"/>
+            <bool32 name="vari2"/>
+            <bool32 name="vari3"/>
+            <int32 name="rate3"/>
+            <int32.positive name="timing"/>
+            <frac32 name="delaybase"/>
+            <frac32 name="ratebase"/>
+         </outlets>
+         <displays/>
+         <params>
+            <int32 name="BPM">
+               <MinValue i="0"/>
+               <MaxValue i="500"/>
+            </int32>
+            <int32 name="vari1">
+               <MinValue i="1"/>
+               <MaxValue i="128"/>
+            </int32>
+            <int32 name="vari2">
+               <MinValue i="1"/>
+               <MaxValue i="384"/>
+            </int32>
+            <int32 name="vari3">
+               <MinValue i="1"/>
+               <MaxValue i="128"/>
+            </int32>
+         </params>
+         <attribs/>
+         <includes/>
+         <code.declaration><![CDATA[int32_t Phase;
+uint32_t r;
+int rate1=3;
+int rate2=4;
+uint32_t freq;]]></code.declaration>
+         <code.init><![CDATA[Phase = 0;
+   r = 1;]]></code.init>
+         <code.krate><![CDATA[{	 
+	int BPM=param_BPM+inlet_BPM;
+	BPM=BPM>0?BPM:1;
+	
+      if (inlet_reset && r) {
+         Phase = 0;
+         r = 0;
+      } else {
+         if (!inlet_reset) r = 1;
+         
+         freq=(uint32_t)(1<<30)/(22500/BPM);
+         Phase += freq>>2;
+      }
+      outlet_beat= (Phase>0)?1:0;
+      outlet_trips=((Phase*rate1)>0)?1:0;
+      outlet_fours=((Phase*rate2)>0)?1:0;
+      outlet_32=((Phase<<5)>0)?1:0;
+      outlet_64=((Phase<<6)>0)?1:0;
+      outlet_vari1=((Phase*param_vari1)>0)?1:0;
+      outlet_vari2=((Phase*param_vari2)>0)?1:0;
+      outlet_vari3=((Phase*(inlet_vari3+param_vari3))>0)?1:0;
+      outlet_rate3=inlet_vari3<<4;
+   }
+   outlet_timing=(uint64_t)(1<<30)*(1<<17)/freq;
+   outlet_delaybase=(uint64_t)(1<<30)*(1<<17)/freq;
+   outlet_ratebase=freq>>2;]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="sss/logic/countExt" uuid="44ed9668-63af-48f8-a018-99db931c5e37" name="sequence count" x="154" y="14">
+      <params>
+         <int32 name="max" value="96"/>
+      </params>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="280" y="14" text="max count=96 as each sequence is 96 steps long (24 per beat)"/>
+   <obj type="string/c" uuid="4aa90a90c435a742ddfa152d232883fc5b2f1b3" name="table name" x="644" y="14">
+      <params/>
+      <attribs>
+         <table attributeName="str" table="Dseq001.tab"/>
+      </attribs>
+   </obj>
+   <obj type="ctrl/toggle" uuid="42b8134fa729d54bfc8d62d6ef3fa99498c1de99" name="LOAD" x="798" y="14">
+      <params>
+         <bool32.tgl name="b" value="0"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="table/load" uuid="600cc22c6734d23a82620da1a14e78782a7e168e" name="load_1" x="868" y="14">
+      <params/>
+      <attribs>
+         <objref attributeName="table" obj="baseq_1"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="4085f233-fa74-4b6f-827d-6d0496590f5a" name="count divide" x="1218" y="14">
+      <params/>
+      <attribs>
+         <spinner attributeName="div" value="6"/>
+      </attribs>
+      <object id="patch/object" uuid="4085f233-fa74-4b6f-827d-6d0496590f5a">
+         <sDescription>divides input value by div</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>logic.axh</helpPatch>
+         <inlets>
+            <int32 name="count" description="input"/>
+         </inlets>
+         <outlets>
+            <int32 name="out" description="output"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs>
+            <spinner name="div" MinValue="1" MaxValue="9999" DefaultValue="1"/>
+         </attribs>
+         <includes/>
+         <code.krate><![CDATA[outlet_out = inlet_count/attr_div;]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="disp/ibar 16" uuid="302bfed4cde8894229679ce81f6b8a5c5212dd98" name="ibar_4" x="1302" y="14">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="1302" y="70" text="1"/>
+   <comment type="patch/comment" x="1400" y="70" text="3"/>
+   <obj type="sss/logic/countExt" uuid="44ed9668-63af-48f8-a018-99db931c5e37" name="patt select division" x="154" y="98">
+      <params>
+         <int32 name="max" value="24"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_3" x="980" y="112">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_tomlow.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_1" x="1022" y="112">
+      <params/>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="10cb6b2d-4339-43d7-8c60-8dc1c03499ff" name="retrigger chance" x="294" y="126">
+      <params>
+         <frac32.u.map name="chance" value="1.0"/>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="10cb6b2d-4339-43d7-8c60-8dc1c03499ff">
+         <sDescription>uniform distributed (white) noise, triggered generation. Range -64..64</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <bool32.rising name="trig" description="trigger"/>
+         </inlets>
+         <outlets>
+            <bool32 name="rand"/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.u.map name="chance"/>
+         </params>
+         <attribs/>
+         <includes/>
+         <code.declaration><![CDATA[int32_t val;
+int ntrig;]]></code.declaration>
+         <code.init><![CDATA[val = (int32_t)(GenerateRandomNumber())>>4;
+ntrig = 0;]]></code.init>
+         <code.krate><![CDATA[if ((inlet_trig>0) && !ntrig) { if(val==0){val = ((int32_t)(GenerateRandomNumber()>>5))<param_chance?1:0;}else{val=0;} ntrig=1;}
+   else if (!(inlet_trig>0)) ntrig=0;
+   outlet_rand= val;]]></code.krate>
+      </object>
+   </patchobj>
+   <patchobj type="patch/object" uuid="fc49ef37-75f0-4867-8e3d-f3aa66ab0d45" name="retrig range" x="378" y="126">
+      <params>
+         <int32 name="max" value="8"/>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="fc49ef37-75f0-4867-8e3d-f3aa66ab0d45">
+         <sDescription>uniform distributed (white) noise, k-rate generation. Range 0..(n-1)</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <bool32.rising name="trig" description="trigger"/>
+         </inlets>
+         <outlets>
+            <int32 name="v" description="random value"/>
+         </outlets>
+         <displays/>
+         <params>
+            <int32 name="max" noLabel="true">
+               <MinValue i="0"/>
+               <MaxValue i="65536"/>
+            </int32>
+         </params>
+         <attribs/>
+         <includes/>
+         <code.declaration><![CDATA[int32_t val;
+int ntrig;
+]]></code.declaration>
+         <code.init><![CDATA[val = 0;
+ntrig = 0;
+]]></code.init>
+         <code.krate><![CDATA[if ((inlet_trig>0) && !ntrig) {
+      if (param_max) 
+         val = ((int32_t)(GenerateRandomNumber()% (param_max-1))+1)*6;
+      else val = 0;
+      ntrig=1;
+   }
+   else if (!(inlet_trig>0)) ntrig=0;
+   outlet_v = val;]]></code.krate>
+      </object>
+   </patchobj>
+   <patchobj type="patch/object" uuid="fc49ef37-75f0-4867-8e3d-f3aa66ab0d45" name="retrig range_" x="448" y="126">
+      <params>
+         <int32 name="max" value="4"/>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="fc49ef37-75f0-4867-8e3d-f3aa66ab0d45">
+         <sDescription>uniform distributed (white) noise, k-rate generation. Range 0..(n-1)</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <bool32.rising name="trig" description="trigger"/>
+         </inlets>
+         <outlets>
+            <int32 name="v" description="random value"/>
+         </outlets>
+         <displays/>
+         <params>
+            <int32 name="max" noLabel="true">
+               <MinValue i="0"/>
+               <MaxValue i="65536"/>
+            </int32>
+         </params>
+         <attribs/>
+         <includes/>
+         <code.declaration><![CDATA[int32_t val;
+int ntrig;
+]]></code.declaration>
+         <code.init><![CDATA[val = 0;
+ntrig = 0;
+]]></code.init>
+         <code.krate><![CDATA[if ((inlet_trig>0) && !ntrig) {
+      if (param_max) 
+         val = 1<<((int32_t)(GenerateRandomNumber()% (param_max)));
+      else val = 0;
+      ntrig=1;
+   }
+   else if (!(inlet_trig>0)) ntrig=0;
+   outlet_v = val;]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="sss/logic/countExt" uuid="44ed9668-63af-48f8-a018-99db931c5e37" name="trig division" x="518" y="126">
+      <params>
+         <int32 name="max" value="0"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="sss/logic/countExt" uuid="44ed9668-63af-48f8-a018-99db931c5e37" name="countExt_4" x="644" y="126">
+      <params>
+         <int32 name="max" value="0"/>
+      </params>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="4085f233-fa74-4b6f-827d-6d0496590f5a" name="count retrigger" x="770" y="126">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4085f233-fa74-4b6f-827d-6d0496590f5a">
+         <sDescription>Copies the input to the output at the rising edge of the trigger input. Keeps the output otherwise.</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>logic.axh</helpPatch>
+         <inlets>
+            <int32 name="count" description="input"/>
+            <int32 name="in"/>
+            <int32 name="max"/>
+            <bool32.rising name="trig" description="trigger"/>
+         </inlets>
+         <outlets>
+            <int32 name="o" description="output"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.declaration><![CDATA[int ntrig;   int latch;]]></code.declaration>
+         <code.krate><![CDATA[if ((inlet_trig>0) && !ntrig) {latch = inlet_count-inlet_max; ntrig=1;}
+if (!(inlet_trig>0)) ntrig=0;
+if(inlet_trig){
+outlet_o= latch+inlet_in;
+}
+else if(!inlet_trig){outlet_o=inlet_count;}]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="sss/logic/countExt" uuid="44ed9668-63af-48f8-a018-99db931c5e37" name="pattern count" x="154" y="182">
+      <params>
+         <int32 name="max" value="16"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_2" x="980" y="210">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_bass.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_2" x="1022" y="210">
+      <params/>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="kick" x="812" y="252">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="sss/patt/rndPattF" uuid="51e68084-34f7-4ce7-b29e-6d2fb66a8b71" name="pattern generator" x="154" y="266">
+      <params>
+         <frac32.u.map name="repeat" value="64.0"/>
+         <int32 name="chance" value="1"/>
+         <frac32.u.map name="change" value="4.0"/>
+         <frac32.u.map name="nonMemRnd" value="11.5"/>
+         <frac32.u.map name="size" value="42.0"/>
+         <frac32.u.map name="freeze" value="2.5"/>
+         <frac32.u.map name="maxFreeze" value="2.0"/>
+         <bool32.mom name="rnd" value="0"/>
+         <frac32.u.map name="CV" value="0.0"/>
+         <frac32.s.map name="max" value="16.0"/>
+         <frac32.s.map name="min" value="0.0"/>
+      </params>
+      <attribs>
+         <spinner attributeName="maxSteps" value="64"/>
+      </attribs>
+   </obj>
+   <obj type="sel/sel i 16" uuid="630930cb677ad1f222ad83b8f84d26a7aa92cafc" name="sel_1" x="266" y="266">
+      <params>
+         <int32.small name="i0" value="47"/>
+         <int32.small name="i1" value="48"/>
+         <int32.small name="i2" value="49"/>
+         <int32.small name="i3" value="50"/>
+         <int32.small name="i4" value="51"/>
+         <int32.small name="i5" value="52"/>
+         <int32.small name="i6" value="53"/>
+         <int32.small name="i7" value="54"/>
+         <int32.small name="i8" value="55"/>
+         <int32.small name="i9" value="56"/>
+         <int32.small name="i10" value="57"/>
+         <int32.small name="i11" value="58"/>
+         <int32.small name="i12" value="59"/>
+         <int32.small name="i13" value="60"/>
+         <int32.small name="i14" value="61"/>
+         <int32.small name="i15" value="46"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="math/+" uuid="b94a9b8e9adcb7d18868c0ee808a9b211b65578d" name="+_1" x="476" y="294">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="sss/seq/baseq" uuid="93d55977-2922-4943-ae7d-4437c6261ad0" name="baseq_1" x="574" y="294">
+      <params/>
+      <attribs>
+         <combo attributeName="mode" selection="keep"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="basskick" x="812" y="294">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_4" x="980" y="308">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_tomhigh.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_3" x="1022" y="308">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="322" text="techno 000-013"/>
+   <comment type="patch/comment" x="14" y="336" text="house 014-118"/>
+   <comment type="patch/comment" x="14" y="350" text="ambient 119-134"/>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="preset" x="406" y="350">
+      <params>
+         <int32 name="value" value="1566"/>
+      </params>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="toms" x="812" y="350">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <comment type="patch/comment" x="14" y="364" text="down tempo 135-142"/>
+   <comment type="patch/comment" x="14" y="378" text="triphop 143-239"/>
+   <comment type="patch/comment" x="14" y="392" text="D&amp;B 240-354"/>
+   <comment type="patch/comment" x="14" y="406" text="breakbeat 355-689"/>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_5" x="980" y="406">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_snare.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_4" x="1022" y="406">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="420" text="glitch 690-772"/>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="snares" x="812" y="420">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <comment type="patch/comment" x="14" y="434" text="world 773-861"/>
+   <comment type="patch/comment" x="14" y="448" text="african 862-936"/>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel2" x="364" y="448">
+      <params>
+         <int32 name="value" value="1"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel1" x="420" y="448">
+      <params>
+         <int32 name="value" value="0"/>
+      </params>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="81d62e7f-3187-4eb0-9085-b13bccc0a9a5" name="mix_1" x="1302" y="448">
+      <params>
+         <frac32.u.map name="gain1" value="42.5"/>
+         <frac32.u.map name="gain2" value="39.0"/>
+         <frac32.u.map name="gain3" value="39.0"/>
+         <frac32.u.map name="gain4" value="32.5"/>
+         <frac32.u.map name="gain5" value="28.0"/>
+         <frac32.u.map name="gain6" value="28.0"/>
+         <frac32.u.map name="gain7" value="14.0"/>
+         <frac32.u.map name="gain8" value="28.0"/>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="81d62e7f-3187-4eb0-9085-b13bccc0a9a5">
+         <sDescription>8 input s-rate mixer, square gain scale</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <frac32buffer name="in1" description="input 1"/>
+            <frac32buffer name="in2" description="input 2"/>
+            <frac32buffer name="in3" description="input 3"/>
+            <frac32buffer name="in4" description="input 4"/>
+            <frac32buffer name="in5" description="input 5"/>
+            <frac32buffer name="in6" description="input 6"/>
+            <frac32buffer name="in7" description="input 7"/>
+            <frac32buffer name="in8" description="input 8"/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description="mix out"/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.u.map.squaregain name="gain1">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain2">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain3">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain4">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain5">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain6">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain7">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+            <frac32.u.map.squaregain name="gain8">
+               <DefaultValue v="32.0"/>
+            </frac32.u.map.squaregain>
+         </params>
+         <attribs/>
+         <includes/>
+         <code.srate><![CDATA[int32_t accum = ___SMMUL(inlet_in1,param_gain1);
+   accum = ___SMMLA(inlet_in2,param_gain2,accum);
+;   accum = ___SMMLA(inlet_in3,param_gain3,accum);
+;   accum = ___SMMLA(inlet_in4,param_gain4,accum);
+;   accum = ___SMMLA(inlet_in5,param_gain5,accum);
+;   accum = ___SMMLA(inlet_in6,param_gain6,accum);
+;   accum = ___SMMLA(inlet_in7,param_gain7,accum);
+;   accum = ___SMMLA(inlet_in8,param_gain8,accum);
+;   outlet_out=  (accum<<1);]]></code.srate>
+      </object>
+   </patchobj>
+   <obj type="sss/audio/StOutVol" uuid="0ca9cf1e-1ce3-469c-80da-a4a885c21246" name="StOutVol_1" x="1442" y="448">
+      <params>
+         <frac32.u.map name="volume" value="43.0"/>
+      </params>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="462" text="country 937-048"/>
+   <comment type="patch/comment" x="14" y="476" text="latin 1049-1197"/>
+   <comment type="patch/comment" x="14" y="490" text="polka 1198-1207"/>
+   <comment type="patch/comment" x="14" y="504" text="R&amp;B 1208-1230"/>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel4" x="364" y="504">
+      <params>
+         <int32 name="value" value="3"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel3" x="420" y="504">
+      <params>
+         <int32 name="value" value="2"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_6" x="980" y="504">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_hihat.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_5" x="1022" y="504">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="518" text="hiphop 1231-1372"/>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="openHH" x="812" y="518">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <comment type="patch/comment" x="14" y="532" text="blues 1373-1429"/>
+   <comment type="patch/comment" x="14" y="546" text="jazz 1430-1554"/>
+   <comment type="patch/comment" x="14" y="560" text="funk 1555-1656"/>
+   <comment type="patch/comment" x="14" y="574" text="reggae 1657-1789"/>
+   <comment type="patch/comment" x="14" y="588" text="ska 1790-1792"/>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel6" x="364" y="588">
+      <params>
+         <int32 name="value" value="5"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel5" x="420" y="588">
+      <params>
+         <int32 name="value" value="4"/>
+      </params>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="602" text="pop 1793-1846"/>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_8" x="980" y="602">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_hihatopen.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_6" x="1022" y="602">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="616" text="punk 1847-1894"/>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="closedHH" x="812" y="616">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <comment type="patch/comment" x="14" y="630" text="doom 1895-1919"/>
+   <comment type="patch/comment" x="14" y="644" text="rock 1920-2374"/>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel8" x="364" y="644">
+      <params>
+         <int32 name="value" value="7"/>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/i" uuid="a3786816db6ea5bc6ac4193a5cccdb2c83b83496" name="channel7" x="420" y="644">
+      <params>
+         <int32 name="value" value="6"/>
+      </params>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="658" text="hardrock 2375-2458"/>
+   <comment type="patch/comment" x="14" y="672" text="metal 2459-2557"/>
+   <comment type="patch/comment" x="14" y="686" text="kitloop 707 2558-2581"/>
+   <comment type="patch/comment" x="14" y="700" text="kitloop 808 2582-2606"/>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_7" x="980" y="700">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_cabasa.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_7" x="1022" y="700">
+      <params/>
+      <attribs/>
+   </obj>
+   <comment type="patch/comment" x="14" y="714" text="kitloop 909 2607-2631"/>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="cymbals" x="812" y="714">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <comment type="patch/comment" x="14" y="728" text="mixed 2632-2756"/>
+   <comment type="patch/comment" x="14" y="742" text="percussion 2757-2866"/>
+   <comment type="patch/comment" x="490" y="742" text="NOTE! most sequences don&apos;t trigger all channels!!!"/>
+   <comment type="patch/comment" x="14" y="756" text="random left 2867-2912"/>
+   <comment type="patch/comment" x="490" y="756" text="most used: kick1,snare, open hihat, closed hihat and cymbals"/>
+   <obj type="wave/play fn" uuid="25910f7130532e4934eed3cf2a934324790d0f00" name="play_9" x="980" y="798">
+      <params/>
+      <attribs>
+         <file attributeName="fn" file="LM1_2_cowbell.raw"/>
+      </attribs>
+   </obj>
+   <obj type="phi/disp/boolms" uuid="4d2b0662-f881-4953-832a-a286daf5b6a3" name="boolms_8" x="1022" y="798">
+      <params/>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262" name="percussions" x="812" y="812">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4227fbc2-bcf7-43d7-b9ce-ad3a3cdc9262">
+         <sDescription>add</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32 name="in1" description="in1"/>
+         </inlets>
+         <outlets>
+            <bool32 name="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <includes/>
+         <code.krate><![CDATA[outlet_out= inlet_in1>0?1:0;]]></code.krate>
+      </object>
+   </patchobj>
+   <nets>
+      <net>
+         <source obj="table name" outlet="out"/>
+         <dest obj="load_1" inlet="filename"/>
+      </net>
+      <net>
+         <source obj="LOAD" outlet="o"/>
+         <dest obj="load_1" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="BPMext_1" outlet="vari1"/>
+         <dest obj="sequence count" inlet="trig"/>
+         <dest obj="patt select division" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="sequence count" outlet="o"/>
+         <dest obj="count retrigger" inlet="count"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="kick"/>
+         <dest obj="kick" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="basskick"/>
+         <dest obj="basskick" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="toms"/>
+         <dest obj="toms" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="snares"/>
+         <dest obj="snares" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="openHH"/>
+         <dest obj="openHH" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="closedHH"/>
+         <dest obj="closedHH" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="cymbals"/>
+         <dest obj="cymbals" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="baseq_1" outlet="percussions"/>
+         <dest obj="percussions" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="mix_1" outlet="out"/>
+         <dest obj="StOutVol_1" inlet="left"/>
+         <dest obj="StOutVol_1" inlet="right"/>
+      </net>
+      <net>
+         <source obj="channel1" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn1"/>
+      </net>
+      <net>
+         <source obj="channel2" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn2"/>
+      </net>
+      <net>
+         <source obj="channel3" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn3"/>
+      </net>
+      <net>
+         <source obj="channel4" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn4"/>
+      </net>
+      <net>
+         <source obj="channel5" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn5"/>
+      </net>
+      <net>
+         <source obj="channel6" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn6"/>
+      </net>
+      <net>
+         <source obj="channel7" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn7"/>
+      </net>
+      <net>
+         <source obj="channel8" outlet="out"/>
+         <dest obj="baseq_1" inlet="chn8"/>
+      </net>
+      <net>
+         <source obj="sequence count" outlet="c"/>
+         <dest obj="pattern generator" inlet="rnd"/>
+         <dest obj="patt select division" inlet="r"/>
+      </net>
+      <net>
+         <source obj="patt select division" outlet="c"/>
+         <dest obj="pattern count" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="pattern count" outlet="o"/>
+         <dest obj="pattern generator" inlet="count"/>
+      </net>
+      <net>
+         <source obj="pattern count" outlet="max"/>
+         <dest obj="pattern generator" inlet="length"/>
+      </net>
+      <net>
+         <source obj="pattern generator" outlet="v"/>
+         <dest obj="sel_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="+_1" outlet="out"/>
+         <dest obj="baseq_1" inlet="p1"/>
+         <dest obj="baseq_1" inlet="p2"/>
+         <dest obj="baseq_1" inlet="p3"/>
+         <dest obj="baseq_1" inlet="p4"/>
+         <dest obj="baseq_1" inlet="p5"/>
+         <dest obj="baseq_1" inlet="p6"/>
+         <dest obj="baseq_1" inlet="p7"/>
+         <dest obj="baseq_1" inlet="p8"/>
+         <dest obj="baseq_1" inlet="pV"/>
+      </net>
+      <net>
+         <source obj="BPMext_1" outlet="vari2"/>
+         <dest obj="trig division" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="retrigger chance" outlet="rand"/>
+         <dest obj="countExt_4" inlet="r"/>
+         <dest obj="count retrigger" inlet="trig"/>
+         <dest obj="retrig range" inlet="trig"/>
+         <dest obj="trig division" inlet="r"/>
+         <dest obj="retrig range_" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="countExt_4" outlet="o"/>
+         <dest obj="count retrigger" inlet="in"/>
+      </net>
+      <net>
+         <source obj="countExt_4" outlet="max"/>
+         <dest obj="count retrigger" inlet="max"/>
+      </net>
+      <net>
+         <source obj="BPMext_1" outlet="vari3"/>
+         <dest obj="retrigger chance" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="retrig range" outlet="v"/>
+         <dest obj="countExt_4" inlet="MaxCount"/>
+      </net>
+      <net>
+         <source obj="trig division" outlet="c"/>
+         <dest obj="countExt_4" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="retrig range_" outlet="v"/>
+         <dest obj="trig division" inlet="MaxCount"/>
+      </net>
+      <net>
+         <source obj="preset" outlet="out"/>
+         <dest obj="+_1" inlet="in2"/>
+      </net>
+      <net>
+         <source obj="basskick" outlet="out"/>
+         <dest obj="play_2" inlet="start"/>
+         <dest obj="boolms_2" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="play_3" outlet="out"/>
+         <dest obj="mix_1" inlet="in1"/>
+      </net>
+      <net>
+         <source obj="toms" outlet="out"/>
+         <dest obj="play_4" inlet="start"/>
+         <dest obj="boolms_3" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="play_4" outlet="out"/>
+         <dest obj="mix_1" inlet="in3"/>
+      </net>
+      <net>
+         <source obj="snares" outlet="out"/>
+         <dest obj="play_5" inlet="start"/>
+         <dest obj="boolms_4" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="play_5" outlet="out"/>
+         <dest obj="mix_1" inlet="in4"/>
+      </net>
+      <net>
+         <source obj="play_6" outlet="out"/>
+         <dest obj="mix_1" inlet="in5"/>
+      </net>
+      <net>
+         <source obj="closedHH" outlet="out"/>
+         <dest obj="boolms_6" inlet="trig"/>
+         <dest obj="play_8" inlet="start"/>
+      </net>
+      <net>
+         <source obj="play_8" outlet="out"/>
+         <dest obj="mix_1" inlet="in6"/>
+      </net>
+      <net>
+         <source obj="play_9" outlet="out"/>
+         <dest obj="mix_1" inlet="in8"/>
+      </net>
+      <net>
+         <source obj="kick" outlet="out"/>
+         <dest obj="play_3" inlet="start"/>
+         <dest obj="boolms_1" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="openHH" outlet="out"/>
+         <dest obj="boolms_5" inlet="trig"/>
+         <dest obj="play_6" inlet="start"/>
+      </net>
+      <net>
+         <source obj="cymbals" outlet="out"/>
+         <dest obj="play_7" inlet="start"/>
+         <dest obj="boolms_7" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="percussions" outlet="out"/>
+         <dest obj="play_9" inlet="start"/>
+         <dest obj="boolms_8" inlet="trig"/>
+      </net>
+      <net>
+         <source obj="play_2" outlet="out"/>
+         <dest obj="mix_1" inlet="in2"/>
+      </net>
+      <net>
+         <source obj="play_7" outlet="out"/>
+         <dest obj="mix_1" inlet="in7"/>
+      </net>
+      <net>
+         <source obj="count divide" outlet="out"/>
+         <dest obj="ibar_4" inlet="in"/>
+      </net>
+      <net>
+         <source obj="count retrigger" outlet="o"/>
+         <dest obj="count divide" inlet="count"/>
+         <dest obj="baseq_1" inlet="clock"/>
+      </net>
+      <net>
+         <source obj="sel_1" outlet="chain"/>
+         <dest obj="+_1" inlet="in1"/>
+      </net>
+   </nets>
+   <settings>
+      <subpatchmode>no</subpatchmode>
+   </settings>
+   <notes><![CDATA[]]></notes>
+   <windowPos>
+      <x>0</x>
+      <y>27</y>
+      <width>1642</width>
+      <height>1053</height>
+   </windowPos>
+</patch-1.0>
